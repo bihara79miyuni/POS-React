@@ -3,27 +3,40 @@ import { Link } from "react-router-dom";
 import StockType from "../types/StockType";
 import axios from "axios";
 import ItemType from "../types/ItemType";
+import { useAuth } from "../context/AuthContext";
 
 function Stock(){
+
+     const { isAuthenticated, jwtToken } = useAuth();
+        
+        
+    const config = {
+        headers: {
+            Authorization: `Bearer ${jwtToken}`
+        }
+    }
+
     const [items,setItems] = useState<ItemType[]>([]);
     const[stocks,setStocks] = useState<StockType[]>([]);
     const[quantity,setQuantity] = useState<number>(0);
     const[itemId,setItemId] = useState<number>();
 
     async function loadStocks(){
-        const response = await axios.get("http://localhost:8080/stocks");
+        const response = await axios.get("http://localhost:8080/stocks",config);
         setStocks(response.data);
     }
 
     async function loadItems() {
-        const response = await axios.get("http://localhost:8080/items")
+        const response = await axios.get("http://localhost:8080/items",config)
         setItems(response.data);
     }
 
     useEffect(function(){
-        loadStocks();
-        loadItems();
-    },[])
+        if(isAuthenticated){
+            loadStocks();
+            loadItems();
+        }   
+    },[isAuthenticated])
 
     function handleQuantity(event:any){
         setQuantity(event.target.value);
@@ -39,7 +52,7 @@ function Stock(){
             itemId:itemId
         }
 
-        const response = await axios.post("http://localhost:8080/stocks",data);
+        const response = await axios.post("http://localhost:8080/stocks",data,config);
         console.log(response);
         loadStocks();
     }

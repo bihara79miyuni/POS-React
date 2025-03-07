@@ -14,9 +14,9 @@ function Home(){
                     <Link to="/stocks" className="relative bg-white-800 p-1 text-gray-400 hover:text-black focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800 focus:outline-hidden px-10">Stocks</Link>
                     <Link to="/transactions" className="relative bg-white-800 p-1 text-gray-400 hover:text-black focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800 focus:outline-hidden px-10">Transactions</Link>
                 </div>
-                <div className="bg-fuchsia-200">
-
-                </div>
+                {/* <div >
+                <img src="D:\POS-SpringB\react\pos-react\src\assets\HomeImage.jpg" alt="HomeImage"/>
+                </div> */}
                 
             </div>
         </div>

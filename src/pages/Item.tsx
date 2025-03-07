@@ -3,8 +3,17 @@ import { Link } from "react-router-dom";
 import ItemType from "../types/ItemType";
 import axios from "axios";
 import ItemCategoryType from "../types/ItemCategoryType";
+import { useAuth } from "../context/AuthContext";
 
-    function Item(){
+function Item(){
+    const { isAuthenticated, jwtToken } = useAuth();
+
+
+    const config = {
+        headers: {
+            Authorization: `Bearer ${jwtToken}`
+        }
+    }
 
     const [items,setItems] = useState<ItemType[]>([]);
 
@@ -16,19 +25,22 @@ import ItemCategoryType from "../types/ItemCategoryType";
 
     
     async function loadItems() {
-        const response = await axios.get("http://localhost:8080/items")
+        const response = await axios.get("http://localhost:8080/items",config)
         setItems(response.data);
     }
 
     async function loadItemCategories(){
-        const response = await axios.get("http://localhost:8080/itemCategories")
+        const response = await axios.get("http://localhost:8080/itemCategories",config)
         setItemCategories(response.data);
     }
 
     useEffect(function(){
+        if (isAuthenticated){
         loadItems();
         loadItemCategories();
-    },[])
+        }
+        
+    },[isAuthenticated])
 
     function handleItemName(event: any){
         setItemName(event.target.value);

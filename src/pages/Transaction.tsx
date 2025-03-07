@@ -1,23 +1,32 @@
 import { useEffect,useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import ItemType from "../types/ItemType";
 import axios from "axios";
 import TransactionType from "../types/TransactionType";
+import { useAuth } from "../context/AuthContext";
 
 
 function Transaction(){
+     const { isAuthenticated, jwtToken } = useAuth();
+            
+            
+        const config = {
+            headers: {
+                Authorization: `Bearer ${jwtToken}`
+            }
+        }
     const [items,setItems] = useState<ItemType[]>([]);
 
     const[transactions,setTransactions] = useState<TransactionType[]>([]);
 
     
     async function loadItems() {
-        const response = await axios.get("http://localhost:8080/items");
+        const response = await axios.get("http://localhost:8080/items",config);
         setItems(response.data);
     }
 
     async function loadTransactions(){
-        const response =await axios.get("http://localhost:8080/transactions");
+        const response =await axios.get("http://localhost:8080/transactions",config);
         setTransactions(response.data);
     }
 
@@ -36,11 +45,15 @@ function Transaction(){
         })
     }, [itemTransactions]);
 
+    const navigate = useNavigate();
+
 
     useEffect(function(){
+        if(isAuthenticated){
             loadItems();
             loadTransactions();
-    },[])
+        }        
+    },[isAuthenticated])
 
     async function saveTransaction(){
         var itemIds:any = [];
@@ -51,6 +64,7 @@ function Transaction(){
 
         try{
             await axios.post("http://localhost:8080/transactions",{itemIds:itemIds})
+            navigate("/transactions");
         }catch(error){
             console.log(error);
         }
@@ -96,7 +110,7 @@ function Transaction(){
                                         <td>{item.id}</td>
                                         <td>{item.name}</td>
                                         <td>{item.description}</td>
-                                        <td>{item.price}</td>
+                                        <td >{item.price}</td>
                                         <td>
                                             <button className="py-3 px-4 bg-fuchsia-800 text-white rounded-lg hover:bg-fuchsia-950 mb-2 text-sm" onClick={() =>addItemsToTransactions(item)}>Add</button>
                                         </td> 
@@ -109,6 +123,38 @@ function Transaction(){
                         </tbody>
                     </table>
                 </div>
+                <div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ItemName</th>
+                                <th>Description</th>
+                                <th>price</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {itemTransactions.map(function(item){
+                                return(
+                                    <tr>
+                                        <td>{item.name}</td>
+                                        <td>{item.description}</td>
+                                        <td>{item.price}</td>
+                                    </tr>
+                                )
+                            })}
+                            <tr>
+                                <td colSpan={2}>
+                                    <strong>Total Amount</strong>
+                                </td>
+                                <td  className="border-t border-slate-500 text-right">
+                                    <strong>{total}</strong>
+                                </td>
+                            </tr>
+                            
+                        </tbody>
+                    </table>
+                    <button className="py-3 px-4 bg-fuchsia-800 text-white rounded-lg hover:bg-fuchsia-950 mb-2 text-sm" onClick={saveTransaction}>Create Transaction</button>
+                </div>
                 <h3 className="text-blue-1000 bg-fuchsia-500">Transactions</h3>
                 <div>
                 <table className="w-full border-separate border-spacing-0 border-none text-left">
@@ -117,7 +163,7 @@ function Transaction(){
                         <th className="w-[80px]">Transaction ID</th>
                         <th className="w-[200px]">Created At</th>
                         <th className="w-[200px]">Total Amount</th>
-                        <th className="w-[200px]">User</th>        
+                             
                     </tr>
                 </thead>
                 <tbody>
@@ -126,8 +172,8 @@ function Transaction(){
                             <tr>
                                 <td>{Transaction.id}</td>
                                 <td>{Transaction.createdAt}</td>
-                                <td>{Transaction.totalAmount}</td>
-                                <td>{Transaction.user?.id}</td>
+                                <td className="text-right">{Transaction.totalAmount}</td>
+                               
                                 
                                 
                             </tr>
@@ -136,7 +182,7 @@ function Transaction(){
                 </tbody>
             </table>
                 </div>
-                <button className="py-3 px-4 bg-fuchsia-800 text-white rounded-lg hover:bg-fuchsia-950 mb-2 text-sm" onClick={saveTransaction}>Create Transaction</button>
+               
         </div>
     )
 }
